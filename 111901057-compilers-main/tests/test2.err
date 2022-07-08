@@ -1,0 +1,21 @@
+IR PRETTY PRINT
+.globl main
+main:
+li t1, 2
+li t3, 3
+li t4, 4
+add t2, t3, t4
+li t8, 10
+syscall
+
+ BASIC BLOCKS 
+.globl main
+
+main:
+li $t1, 2
+li $t3, 3
+li $t4, 4
+add $t2, $t3, $t4
+li $v0, 10
+syscall
+

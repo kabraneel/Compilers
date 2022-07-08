@@ -1,0 +1,16 @@
+.globl main
+main:
+li $t1, 3
+li $t2, 2
+li $t3, 70
+label1:
+beq $t2, $t3, label2
+move $t4, $t1
+move $a0, $t4
+li $v0, 1
+syscall
+addi $t2, $t2, 1
+j label1
+label2:
+li $v0, 10
+syscall

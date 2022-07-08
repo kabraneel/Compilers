@@ -1,0 +1,76 @@
+(* This is the preamble where you can have arbitrary sml code. For us
+it is empty *)
+
+%%
+(* The terminals or tokens of the language *)
+%term CONST of int
+    | PLUS
+    | MINUS
+    | MUL
+    | ASSIGN
+    | PRINT
+    | VAR of string
+    | EOF
+    | NEWLINE
+    | SEMICOLON
+    | ID of string
+    | FOR
+    | TO
+    | DO
+    | DONE
+    | OBRAC
+    | CBRAC
+
+(* The nonterminals of the language *)
+%nonterm EXP     of Ast.Expr
+       | EXPS    of Ast.Expr list
+       | STMT    of Ast.Stmt
+       | STMTS   of Ast.Stmt list
+       | PROGRAM of Ast.Stmt list
+
+%eop EOF (* What token to use as end of parsing token              *)
+%verbose (* Generates a printed form of the table in expr.grm.desc *)
+%pure
+
+
+%name Expr (* The prefix to use on the name of LrValFun structure *)
+
+
+%noshift EOF
+(*
+
+Operator precedence and associativity. The %left says the operator is
+left associative and the precedence increase as you go down this list.
+
+*)
+
+
+%left PLUS MINUS  (* + and - are of same precedence *)
+%left MUL         (* higher than + and -            *)
+%left OBRAC CBRAC
+
+(* The type that captures position in the input *)
+%pos int
+
+%%
+
+PROGRAM     : STMTS                ( STMTS )
+            | STMTS NEWLINE        ( STMTS )
+
+STMTS       : (* empty *)                                           ( []                )
+            | STMT NEWLINE STMTS                                    ( STMT :: STMTS     )
+
+STMT        : VAR ASSIGN EXP SEMICOLON                       ( Ast.assign VAR EXP)
+            | PRINT EXP SEMICOLON                            ( Ast.Print EXP )
+            | FOR VAR ASSIGN CONST TO CONST NEWLINE DO NEWLINE STMTS DONE SEMICOLON   ( Ast.for   (Ast.Var VAR) (Ast.Const CONST1) (Ast.Const CONST2) STMTS)
+
+EXP         : CONST                                 ( Ast.Const CONST )
+            | VAR                                   ( Ast.Var   VAR   )
+            | EXP PLUS EXP                          ( Ast.plus  EXP1 EXP2)
+            | OBRAC EXP PLUS EXP CBRAC                         ( Ast.plus  EXP1 EXP2)
+            | EXP MINUS EXP                         ( Ast.minus EXP1 EXP2 )
+            | OBRAC EXP MINUS EXP  CBRAC                       ( Ast.minus EXP1 EXP2 )
+            | OBRAC EXP MUL   EXP  CBRAC                       ( Ast.mul   EXP1 EXP2 )
+            | EXP MUL   EXP                         ( Ast.mul   EXP1 EXP2 )
+
+    
